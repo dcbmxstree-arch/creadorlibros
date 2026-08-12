@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Generador de Libro de Trabajo · LaTeX</title>
+
+    <!-- pdf.js para extraer texto del PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js">
+    </script>
+
+    <style>
+        /* --- Estilos similares al anterior, adaptados --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #f0f4f8;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            padding: 2rem 1rem;
+            color: #1e293b;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 20, 40, 0.08);
+            padding: 2rem 2.5rem;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        h1 small {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: #64748b;
+            margin-left: 0.5rem;
+        }
+        .subtitle {
+            color: #475569;
+            margin-bottom: 2rem;
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+            font-size: 1.05rem;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin: 1.5rem 0;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        .form-group label {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .form-group input,
+        .form-group textarea {
+            padding: 0.6rem 0.8rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            background: white;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        .file-box {
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            grid-column: 1 / -1;
+        }
+        .file-box label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.4rem;
+        }
+        .file-box .file-info {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 0.3rem;
+        }
+        .file-box .status-badge {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.15rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: #e2e8f0;
+            color: #475569;
+        }
+        .file-box .status-badge.loaded {
+            background: #bbf7d0;
+            color: #166534;
+        }
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1.5rem 0 0.5rem 0;
+            align-items: center;
+        }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.7rem 2rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+        }
+        .btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            transform: none;
+        }
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #1e293b;
+            box-shadow: none;
+        }
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+        .btn-success {
+            background: #22c55e;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+        }
+        .btn-success:hover {
+            background: #16a34a;
+        }
+        #progressBar {
+            flex: 1;
+            min-width: 150px;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+        }
+        #progressBar .fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+        #statusMsg {
+            font-size: 0.9rem;
+            color: #475569;
+            margin-left: 0.5rem;
+        }
+        .result-area {
+            margin-top: 2.5rem;
+            border-top: 2px solid #e2e8f0;
+            padding-top: 1.5rem;
+        }
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .result-header h2 {
+            font-size: 1.4rem;
+            font-weight: 500;
+        }
+        .result-header .btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        #resultContainer {
+            background: #1e293b;
+            border-radius: 1rem;
+            padding: 1rem;
+            min-height: 400px;
+            position: relative;
+        }
+        #resultContainer textarea {
+            width: 100%;
+            height: 500px;
+            background: #0f172a;
+            color: #e2e8f0;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            resize: vertical;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        #resultContainer .placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+        .error-msg {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.75rem;
+            margin-top: 0.5rem;
+            border-left: 4px solid #ef4444;
+        }
+        @media (max-width: 760px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 1.5rem;
+            }
+            h1 {
+                font-size: 1.8rem;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>
+                📘 Generador de Libro de Trabajo
+                <small>con DeepSeek · LaTeX</small>
+            </h1>
+            <div class="subtitle">
+                Sube el sílabo y obtén un libro de trabajo completo en código LaTeX,
+                con teoría, ejercicios resueltos paso a paso y más de 100 problemas propuestos.
+            </div>
+        </header>
+
+        <!-- Formulario -->
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="university">🏛️ Universidad</label>
+                <input type="text" id="university" placeholder="Ej. Universidad Nacional" />
+            </div>
+            <div class="form-group">
+                <label for="institute">🏫 Instituto / Facultad</label>
+                <input type="text" id="institute" placeholder="Ej. Facultad de Ciencias" />
+            </div>
+            <div class="form-group full-width">
+                <label for="phone">📞 Teléfono de contacto</label>
+                <input type="text" id="phone" placeholder="Ej. +34 912 345 678" />
+            </div>
+
+            <!-- Carga del sílabo -->
+            <div class="file-box" id="syllabusBox">
+                <label for="syllabusFile">📄 Sílabo de la asignatura (PDF)</label>
+                <input type="file" id="syllabusFile" accept=".pdf" />
+                <div class="file-info" id="syllabusInfo">Ningún archivo seleccionado</div>
+                <span class="status-badge" id="syllabusStatus">Sin cargar</span>
+            </div>
+
+            <!-- Instrucciones adicionales -->
+            <div class="form-group full-width">
+                <label for="customPrompt">✏️ Instrucciones adicionales (opcional)</label>
+                <textarea id="customPrompt" placeholder="Ej. Enfócate en aplicaciones prácticas, usa ejemplos de ingeniería..."></textarea>
+            </div>
+        </div>
+
+        <!-- Botones y progreso -->
+        <div class="actions">
+            <button class="btn" id="generateBtn">🚀 Generar Libro</button>
+            <button class="btn btn-secondary" id="clearBtn">🗑️ Limpiar</button>
+            <div id="progressBar"><div class="fill" id="progressFill"></div></div>
+            <span id="statusMsg">Listo</span>
+        </div>
+
+        <!-- Resultado -->
+        <div class="result-area">
+            <div class="result-header">
+                <h2>📜 Código LaTeX generado</h2>
+                <div class="btn-group">
+                    <button class="btn btn-success" id="downloadTexBtn" disabled>⬇️ Descargar .tex</button>
+                    <button class="btn btn-secondary" id="copyTexBtn" disabled>📋 Copiar</button>
+                </div>
+            </div>
+            <div id="resultContainer">
+                <div class="placeholder" id="placeholderMsg">
+                    <span>El código LaTeX se mostrará aquí después de generarlo.</span>
+                </div>
+                <textarea id="latexOutput" style="display:none;" readonly></textarea>
+                <div id="errorDisplay" class="error-msg" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ----------------------------------------------------------------
+        // 1. CONFIGURACIÓN
+        // ----------------------------------------------------------------
+        const WORKER_URL = 'https://tu-proxy.tu-usuario.workers.dev'; // <-- CAMBIAR POR TU URL REAL
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // ----------------------------------------------------------------
+        // 2. ELEMENTOS DOM
+        // ----------------------------------------------------------------
+        const universityInput = document.getElementById('university');
+        const instituteInput = document.getElementById('institute');
+        const phoneInput = document.getElementById('phone');
+        const syllabusFile = document.getElementById('syllabusFile');
+        const syllabusInfo = document.getElementById('syllabusInfo');
+        const syllabusStatus = document.getElementById('syllabusStatus');
+        const customPromptText = document.getElementById('customPrompt');
+        const generateBtn = document.getElementById('generateBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const progressFill = document.getElementById('progressFill');
+        const progressBar = document.getElementById('progressBar');
+        const statusMsg = document.getElementById('statusMsg');
+        const latexOutput = document.getElementById('latexOutput');
+        const placeholderMsg = document.getElementById('placeholderMsg');
+        const errorDisplay = document.getElementById('errorDisplay');
+        const downloadTexBtn = document.getElementById('downloadTexBtn');
+        const copyTexBtn = document.getElementById('copyTexBtn');
+
+        let syllabusText = '';
+        let generatedLatex = '';
+
+        // ----------------------------------------------------------------
+        // 3. MANEJO DE ARCHIVO PDF
+        // ----------------------------------------------------------------
+        async function extractTextFromPDF(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let fullText = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                const strings = content.items.map(item => item.str);
+                fullText += strings.join(' ') + '\n';
+            }
+            return fullText.trim();
+        }
+
+        syllabusFile.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            syllabusInfo.textContent = file.name;
+            syllabusStatus.textContent = 'Cargando...';
+            syllabusStatus.className = 'status-badge';
+            try {
+                syllabusText = await extractTextFromPDF(file);
+                syllabusStatus.textContent = '✅ Cargado (' + syllabusText.length + ' caracteres)';
+                syllabusStatus.className = 'status-badge loaded';
+            } catch (err) {
+                syllabusStatus.textContent = '❌ Error al leer PDF';
+                syllabusStatus.className = 'status-badge';
+                console.error(err);
+                syllabusText = '';
+            }
+        });
+
+        // ----------------------------------------------------------------
+        // 4. FUNCIONES AUXILIARES UI
+        // ----------------------------------------------------------------
+        function setStatus(msg, progress = null) {
+            statusMsg.textContent = msg;
+            if (progress !== null) {
+                progressBar.style.display = 'block';
+                progressFill.style.width = Math.min(progress, 100) + '%';
+            } else {
+                progressBar.style.display = 'none';
+            }
+        }
+
+        function showError(msg) {
+            errorDisplay.textContent = '❌ ' + msg;
+            errorDisplay.style.display = 'block';
+            latexOutput.style.display = 'none';
+            placeholderMsg.style.display = 'none';
+        }
+
+        function hideError() {
+            errorDisplay.style.display = 'none';
+        }
+
+        function showPlaceholder() {
+            placeholderMsg.style.display = 'flex';
+            latexOutput.style.display = 'none';
+            hideError();
+        }
+
+        function showLatex(code) {
+            hideError();
+            placeholderMsg.style.display = 'none';
+            latexOutput.style.display = 'block';
+            latexOutput.value = code;
+            generatedLatex = code;
+            downloadTexBtn.disabled = false;
+            copyTexBtn.disabled = false;
+        }
+
+        // ----------------------------------------------------------------
+        // 5. CONSTRUCCIÓN DEL PROMPT (LA ESPECIALIDAD)
+        // ----------------------------------------------------------------
+        function buildPrompt(syllabus, university, institute, phone, extraInstructions) {
+            return `
+        Eres un experto en educación y en LaTeX. Debes generar un libro de trabajo completo en código LaTeX (listo para Overleaf) para la asignatura descrita en el sílabo.
+
+        ### DATOS DE LA INSTITUCIÓN
+        - Universidad: ${university || 'Universidad'}
+        - Instituto/Facultad: ${institute || 'Facultad'}
+        - Teléfono: ${phone || 'Teléfono'}
+
+        Debes incluir estos datos en el encabezado (usando el paquete fancyhdr) de cada página del documento. El diseño debe ser profesional, con márgenes adecuados, numeración, y estructura clara.
+
+        ### CONTENIDO DEL LIBRO (basado en el sílabo):
+        ${syllabus}
+
+        ### REQUISITOS ESPECÍFICOS:
+        1. **Estructura del documento**:
+           - Portada con título "Libro de Trabajo", asignatura, universidad, instituto y fecha.
+           - Índice general.
+           - Introducción o presentación.
+           - Capítulos para cada tema principal del sílabo.
+           - Cada capítulo debe contener:
+             - Teoría detallada con ejemplos.
+             - Al menos **3 ejercicios resueltos paso a paso** (con explicaciones de cada paso).
+             - Al menos **10 problemas propuestos** (de dificultad media y alta) por tema, sin solución.
+           - Al final, un apartado de "Soluciones a los problemas propuestos" (opcional, o dejarlo como ejercicio).
+
+        2. **Cantidad total de problemas propuestos**: Debe haber un mínimo de **100 problemas propuestos** en todo el libro, distribuidos equitativamente entre los temas.
+
+        3. **Formato técnico**:
+           - Usa paquetes: inputenc (UTF-8), fontenc, babel (español), amsmath, amssymb, geometry, fancyhdr, titlesec, etc.
+           - Configura fancyhdr para que en cada página (excepto portada) aparezca en el encabezado: Universidad, Instituto, Teléfono.
+           - Estilo profesional: secciones numeradas, subsecciones, etc.
+           - No incluyas gráficos (ni imágenes ni diagramas).
+           - Todo el contenido debe ser texto y ecuaciones matemáticas.
+
+        4. **Ejercicios resueltos**:
+           - Cada ejercicio debe tener enunciado.
+           - La solución debe estar dividida en pasos numerados, con comentarios que expliquen el razonamiento.
+           - Usa el entorno "enumerate" o "itemize" para los pasos.
+
+        5. **Problemas propuestos**:
+           - Enunciados claros.
+           - Dificultad media y alta (puedes indicarlo al inicio del problema).
+
+        ### INSTRUCCIONES ADICIONALES DEL USUARIO:
+        ${extraInstructions || 'Ninguna.'}
+
+        ### FORMATO DE SALIDA:
+        Devuelve ÚNICAMENTE el código LaTeX completo, sin texto adicional fuera del código. No uses bloques de código markdown. Comienza directamente con \\documentclass.
+        `;
+        }
+
+        // ----------------------------------------------------------------
+        // 6. GENERACIÓN (LLAMADA AL WORKER)
+        // ----------------------------------------------------------------
+        async function generateBook() {
+            // Validaciones
+            if (!syllabusText) {
+                alert('Por favor, carga el archivo PDF del sílabo.');
+                return;
+            }
+            if (!universityInput.value.trim() || !instituteInput.value.trim() || !phoneInput.value.trim()) {
+                alert('Por favor, completa los campos de Universidad, Instituto y Teléfono.');
+                return;
+            }
+
+            generateBtn.disabled = true;
+            generateBtn.textContent = '⏳ Generando...';
+            showPlaceholder();
+            hideError();
+            setStatus('Preparando prompt...', 5);
+
+            try {
+                const prompt = buildPrompt(
+                    syllabusText,
+                    universityInput.value.trim(),
+                    instituteInput.value.trim(),
+                    phoneInput.value.trim(),
+                    customPromptText.value
+                );
+
+                setStatus('Enviando a DeepSeek...', 20);
+
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'deepseek-v4-pro', // o 'deepseek-v4-flash'
+                        messages: [
+                            { role: 'system', content: 'Eres un experto en LaTeX y educación. Genera código LaTeX limpio y profesional.' },
+                            { role: 'user', content: prompt }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 350000 // suficiente para un libro extenso
+                    })
+                });
+
+                setStatus('Esperando respuesta...', 40);
+
+                if (!response.ok) {
+                    let errMsg = `Error ${response.status}: ${response.statusText}`;
+                    try {
+                        const errData = await response.json();
+                        if (errData.error) errMsg = errData.error.message || errMsg;
+                    } catch (_) { /* ignore */ }
+                    throw new Error(errMsg);
+                }
+
+                setStatus('Procesando respuesta...', 70);
+
+                const data = await response.json();
+                if (data.choices && data.choices.length > 0) {
+                    let content = data.choices[0].message.content;
+                    // Limpiar posibles bloques de código markdown
+                    content = content.replace(/```(?:latex)?\s*([\s\S]*?)\s*```/g, (match, code) => code.trim());
+                    // Si no empieza con \documentclass, intentamos extraerlo
+                    if (!content.trim().startsWith('\\documentclass')) {
+                        // Buscar el primer \documentclass
+                        const match = content.match(/\\documentclass[\s\S]*/);
+                        if (match) content = match[0];
+                    }
+                    showLatex(content);
+                    setStatus('✅ Libro generado correctamente', 100);
+                } else {
+                    throw new Error('La respuesta no contiene contenido válido.');
+                }
+
+            } catch (error) {
+                console.error(error);
+                showError(error.message || 'Error desconocido al generar el libro.');
+                setStatus('❌ Error', null);
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = '🚀 Generar Libro';
+                setTimeout(() => {
+                    if (!generatedLatex) setStatus('Listo', null);
+                }, 1000);
+            }
+        }
+
+        // ----------------------------------------------------------------
+        // 7. EVENT LISTENERS
+        // ----------------------------------------------------------------
+        generateBtn.addEventListener('click', generateBook);
+
+        clearBtn.addEventListener('click', () => {
+            universityInput.value = '';
+            instituteInput.value = '';
+            phoneInput.value = '';
+            syllabusFile.value = '';
+            syllabusInfo.textContent = 'Ningún archivo seleccionado';
+            syllabusStatus.textContent = 'Sin cargar';
+            syllabusStatus.className = 'status-badge';
+            syllabusText = '';
+            customPromptText.value = '';
+            generatedLatex = '';
+            showPlaceholder();
+            latexOutput.style.display = 'none';
+            downloadTexBtn.disabled = true;
+            copyTexBtn.disabled = true;
+            setStatus('Listo', null);
+            hideError();
+        });
+
+        downloadTexBtn.addEventListener('click', () => {
+            if (!generatedLatex) return;
+            const blob = new Blob([generatedLatex], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'libro_trabajo.tex';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        copyTexBtn.addEventListener('click', async () => {
+            if (!generatedLatex) return;
+            try {
+                await navigator.clipboard.writeText(generatedLatex);
+                alert('¡Código LaTeX copiado al portapapeles!');
+            } catch (err) {
+                alert('No se pudo copiar: ' + err.message);
+            }
+        });
+
+        // ----------------------------------------------------------------
+        // 8. INICIO
+        // ----------------------------------------------------------------
+        showPlaceholder();
+        setStatus('Listo, completa los datos y genera.', null);
+    </script>
+
+</body>
+</html>
