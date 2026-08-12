@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Generador de Libro de Trabajo · LaTeX</title>
+    <title>Generador de Libro · Capítulo a Capítulo</title>
 
-    <!-- pdf.js para extraer texto del PDF -->
+    <!-- pdf.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js">
     </script>
 
     <style>
-        /* --- Estilos --- */
+        /* --- Estilos generales --- */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -25,7 +25,7 @@
             justify-content: center;
         }
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             width: 100%;
             background: white;
             border-radius: 2rem;
@@ -38,6 +38,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
         h1 small {
             font-size: 0.9rem;
@@ -52,6 +53,8 @@
             padding-left: 1rem;
             font-size: 1.05rem;
         }
+
+        /* --- Formulario --- */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -113,6 +116,8 @@
             background: #bbf7d0;
             color: #166534;
         }
+
+        /* --- Botones y progreso --- */
         .actions {
             display: flex;
             flex-wrap: wrap;
@@ -124,7 +129,7 @@
             background: #3b82f6;
             color: white;
             border: none;
-            padding: 0.7rem 2rem;
+            padding: 0.7rem 1.8rem;
             border-radius: 2rem;
             font-weight: 600;
             font-size: 1rem;
@@ -159,6 +164,21 @@
         .btn-success:hover {
             background: #16a34a;
         }
+        .btn-warning {
+            background: #f59e0b;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+        }
+        .btn-warning:hover {
+            background: #d97706;
+        }
+        .btn-danger {
+            background: #ef4444;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
         #progressBar {
             flex: 1;
             min-width: 150px;
@@ -180,8 +200,127 @@
             color: #475569;
             margin-left: 0.5rem;
         }
+
+        /* --- Paneles de trabajo --- */
+        .work-area {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            border-top: 2px solid #e2e8f0;
+            padding-top: 1.5rem;
+        }
+        .panel-plan {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1rem;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .panel-plan h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .panel-plan ul {
+            list-style: none;
+            padding: 0;
+        }
+        .panel-plan ul li {
+            padding: 0.5rem 0.8rem;
+            margin-bottom: 0.3rem;
+            border-radius: 0.5rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: 0.1s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        .panel-plan ul li:hover {
+            background: #f1f5f9;
+        }
+        .panel-plan ul li.active {
+            border-color: #3b82f6;
+            background: #dbeafe;
+        }
+        .panel-plan ul li.done {
+            border-color: #22c55e;
+            background: #dcfce7;
+        }
+        .panel-plan ul li .badge {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.6rem;
+            border-radius: 20px;
+            background: #e2e8f0;
+            color: #475569;
+        }
+        .panel-plan ul li.done .badge {
+            background: #22c55e;
+            color: white;
+        }
+        .panel-plan ul li.active .badge {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .panel-capitulo {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+        .panel-capitulo .cap-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .panel-capitulo .cap-header h3 {
+            font-size: 1.2rem;
+        }
+        .panel-capitulo .cap-header .btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .panel-capitulo textarea {
+            width: 100%;
+            min-height: 300px;
+            background: #0f172a;
+            color: #e2e8f0;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.8rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            resize: vertical;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .panel-capitulo .comentarios {
+            margin-top: 1rem;
+        }
+        .panel-capitulo .comentarios label {
+            font-weight: 500;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        .panel-capitulo .comentarios textarea {
+            min-height: 80px;
+            background: #f8fafc;
+            color: #1e293b;
+            font-family: inherit;
+            font-size: 0.9rem;
+            border: 1px solid #cbd5e1;
+        }
+
         .result-area {
-            margin-top: 2.5rem;
+            margin-top: 2rem;
             border-top: 2px solid #e2e8f0;
             padding-top: 1.5rem;
         }
@@ -196,10 +335,6 @@
         .result-header h2 {
             font-size: 1.4rem;
             font-weight: 500;
-        }
-        .result-header .btn-group {
-            display: flex;
-            gap: 0.5rem;
         }
         #resultContainer {
             background: #1e293b;
@@ -239,16 +374,16 @@
             margin-top: 0.5rem;
             border-left: 4px solid #ef4444;
         }
-        @media (max-width: 760px) {
+
+        @media (max-width: 860px) {
+            .work-area {
+                grid-template-columns: 1fr;
+            }
             .form-grid {
                 grid-template-columns: 1fr;
             }
             .container {
                 padding: 1.5rem;
-            }
-            h1 {
-                font-size: 1.8rem;
-                flex-wrap: wrap;
             }
         }
     </style>
@@ -260,15 +395,14 @@
         <header>
             <h1>
                 📘 Generador de Libro de Trabajo
-                <small>con DeepSeek · LaTeX</small>
+                <small>por capítulos · con revisión</small>
             </h1>
             <div class="subtitle">
-                Sube el sílabo y obtén un libro de trabajo completo en código LaTeX,
-                con teoría, ejercicios resueltos paso a paso y más de 100 problemas propuestos.
+                Carga el sílabo, genera el plan, revisa capítulo por capítulo y obtén el libro completo en LaTeX.
             </div>
         </header>
 
-        <!-- Formulario -->
+        <!-- Formulario de entrada -->
         <div class="form-grid">
             <div class="form-group">
                 <label for="university">🏛️ Universidad</label>
@@ -283,7 +417,6 @@
                 <input type="text" id="phone" placeholder="Ej. +34 912 345 678" />
             </div>
 
-            <!-- Carga del sílabo -->
             <div class="file-box" id="syllabusBox">
                 <label for="syllabusFile">📄 Sílabo de la asignatura (PDF)</label>
                 <input type="file" id="syllabusFile" accept=".pdf" />
@@ -291,25 +424,57 @@
                 <span class="status-badge" id="syllabusStatus">Sin cargar</span>
             </div>
 
-            <!-- Instrucciones adicionales -->
             <div class="form-group full-width">
                 <label for="customPrompt">✏️ Instrucciones adicionales (opcional)</label>
-                <textarea id="customPrompt" placeholder="Ej. Enfócate en aplicaciones prácticas, usa ejemplos de ingeniería..."></textarea>
+                <textarea id="customPrompt" placeholder="Ej. Enfócate en aplicaciones prácticas..."></textarea>
             </div>
         </div>
 
-        <!-- Botones y progreso -->
+        <!-- Botones de acción general -->
         <div class="actions">
-            <button class="btn" id="generateBtn">🚀 Generar Libro</button>
+            <button class="btn" id="generarPlanBtn">📋 Generar Plan de Trabajo</button>
             <button class="btn btn-secondary" id="clearBtn">🗑️ Limpiar</button>
             <div id="progressBar"><div class="fill" id="progressFill"></div></div>
             <span id="statusMsg">Listo</span>
         </div>
 
-        <!-- Resultado -->
-        <div class="result-area">
+        <!-- Área de trabajo: plan + capítulo -->
+        <div class="work-area" id="workArea" style="display:none;">
+            <div class="panel-plan">
+                <h3>
+                    📑 Capítulos
+                    <span id="capCount">0</span>
+                </h3>
+                <ul id="planList"></ul>
+                <button class="btn btn-success" id="ensamblarBtn" style="width:100%; margin-top:1rem;" disabled>
+                    🧩 Ensamblar libro completo
+                </button>
+            </div>
+            <div class="panel-capitulo">
+                <div class="cap-header">
+                    <h3 id="capTitulo">Selecciona un capítulo</h3>
+                    <div class="btn-group">
+                        <button class="btn btn-warning" id="generarCapBtn" disabled>⚙️ Generar</button>
+                        <button class="btn btn-success" id="aceptarCapBtn" disabled>✅ Aceptar</button>
+                    </div>
+                </div>
+                <div id="capContent">
+                    <textarea id="capTexto" placeholder="El contenido del capítulo aparecerá aquí..." readonly></textarea>
+                </div>
+                <div class="comentarios">
+                    <label for="capComentarios">📝 Comentarios / correcciones para este capítulo:</label>
+                    <textarea id="capComentarios" placeholder="Escribe aquí tus observaciones..."></textarea>
+                    <button class="btn btn-secondary" id="aplicarComentariosBtn" style="margin-top:0.5rem;" disabled>
+                        🔄 Regenerar con comentarios
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultado final (ensamble) -->
+        <div class="result-area" id="resultArea" style="display:none;">
             <div class="result-header">
-                <h2>📜 Código LaTeX generado</h2>
+                <h2>📜 Código LaTeX completo</h2>
                 <div class="btn-group">
                     <button class="btn btn-success" id="downloadTexBtn" disabled>⬇️ Descargar .tex</button>
                     <button class="btn btn-secondary" id="copyTexBtn" disabled>📋 Copiar</button>
@@ -317,7 +482,7 @@
             </div>
             <div id="resultContainer">
                 <div class="placeholder" id="placeholderMsg">
-                    <span>El código LaTeX se mostrará aquí después de generarlo.</span>
+                    <span>El libro completo se mostrará aquí después de ensamblar.</span>
                 </div>
                 <textarea id="latexOutput" style="display:none;" readonly></textarea>
                 <div id="errorDisplay" class="error-msg" style="display:none;"></div>
@@ -329,7 +494,7 @@
         // ----------------------------------------------------------------
         // 1. CONFIGURACIÓN
         // ----------------------------------------------------------------
-        const WORKER_URL = 'https://tu-proxy.tu-usuario.workers.dev'; // <-- CAMBIAR POR TU URL REAL
+        const WORKER_URL = 'https://tu-proxy.tu-usuario.workers.dev'; // <-- CAMBIAR
 
         pdfjsLib.GlobalWorkerOptions.workerSrc =
             'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -344,22 +509,43 @@
         const syllabusInfo = document.getElementById('syllabusInfo');
         const syllabusStatus = document.getElementById('syllabusStatus');
         const customPromptText = document.getElementById('customPrompt');
-        const generateBtn = document.getElementById('generateBtn');
+        const generarPlanBtn = document.getElementById('generarPlanBtn');
         const clearBtn = document.getElementById('clearBtn');
         const progressFill = document.getElementById('progressFill');
         const progressBar = document.getElementById('progressBar');
         const statusMsg = document.getElementById('statusMsg');
+        const workArea = document.getElementById('workArea');
+        const planList = document.getElementById('planList');
+        const capCount = document.getElementById('capCount');
+        const capTitulo = document.getElementById('capTitulo');
+        const capTexto = document.getElementById('capTexto');
+        const capComentarios = document.getElementById('capComentarios');
+        const generarCapBtn = document.getElementById('generarCapBtn');
+        const aceptarCapBtn = document.getElementById('aceptarCapBtn');
+        const aplicarComentariosBtn = document.getElementById('aplicarComentariosBtn');
+        const ensamblarBtn = document.getElementById('ensamblarBtn');
+        const resultArea = document.getElementById('resultArea');
         const latexOutput = document.getElementById('latexOutput');
         const placeholderMsg = document.getElementById('placeholderMsg');
         const errorDisplay = document.getElementById('errorDisplay');
         const downloadTexBtn = document.getElementById('downloadTexBtn');
         const copyTexBtn = document.getElementById('copyTexBtn');
 
+        // ----------------------------------------------------------------
+        // 3. ESTADO DE LA APLICACIÓN
+        // ----------------------------------------------------------------
         let syllabusText = '';
-        let generatedLatex = '';
+        let university = '';
+        let institute = '';
+        let phone = '';
+        let plan = []; // array de nombres de capítulos
+        let capitulos = {}; // objeto: { 'nombre': 'contenido_latex' }
+        let capitulosAceptados = {}; // objeto: { 'nombre': true/false }
+        let capituloActual = null; // nombre del capítulo seleccionado
+        let libroCompleto = '';
 
         // ----------------------------------------------------------------
-        // 3. MANEJO DE ARCHIVO PDF
+        // 4. MANEJO DE PDF
         // ----------------------------------------------------------------
         async function extractTextFromPDF(file) {
             const arrayBuffer = await file.arrayBuffer();
@@ -393,7 +579,7 @@
         });
 
         // ----------------------------------------------------------------
-        // 4. FUNCIONES AUXILIARES UI
+        // 5. FUNCIONES UI
         // ----------------------------------------------------------------
         function setStatus(msg, progress = null) {
             statusMsg.textContent = msg;
@@ -416,184 +602,366 @@
             errorDisplay.style.display = 'none';
         }
 
-        function showPlaceholder() {
+        function showPlaceholderFinal() {
             placeholderMsg.style.display = 'flex';
             latexOutput.style.display = 'none';
             hideError();
         }
 
-        function showLatex(code) {
+        function showFinalLatex(code) {
             hideError();
             placeholderMsg.style.display = 'none';
             latexOutput.style.display = 'block';
             latexOutput.value = code;
-            generatedLatex = code;
+            libroCompleto = code;
             downloadTexBtn.disabled = false;
             copyTexBtn.disabled = false;
         }
 
-        // ----------------------------------------------------------------
-        // 5. CONSTRUCCIÓN DEL PROMPT (CORREGIDO)
-        // ----------------------------------------------------------------
-        function buildPrompt(syllabus, university, institute, phone, extraInstructions) {
-            return `
-        Eres un experto en educación y en LaTeX. Debes generar un libro de trabajo completo en código LaTeX (listo para Overleaf) para la asignatura descrita en el sílabo.
+        function renderPlan() {
+            planList.innerHTML = '';
+            plan.forEach((nombre, idx) => {
+                const li = document.createElement('li');
+                li.textContent = `${idx+1}. ${nombre}`;
+                li.dataset.index = idx;
+                li.dataset.nombre = nombre;
 
-        ### DATOS DE LA INSTITUCIÓN
-        - Universidad: ${university || 'Universidad'}
-        - Instituto/Facultad: ${institute || 'Facultad'}
-        - Teléfono: ${phone || 'Teléfono'}
+                const badge = document.createElement('span');
+                badge.className = 'badge';
+                if (capitulosAceptados[nombre]) {
+                    li.classList.add('done');
+                    badge.textContent = '✅';
+                } else if (capitulos[nombre]) {
+                    badge.textContent = '📝';
+                } else {
+                    badge.textContent = '⏳';
+                }
+                li.appendChild(badge);
 
-        Debes incluir estos datos en el documento de la siguiente manera:
-        - En el **encabezado** (usando fancyhdr) debe aparecer **únicamente el nombre de la Universidad** (puede estar centrado o a la izquierda).
-        - En el **pie de página** debe aparecer el **nombre del Instituto y el número de teléfono** (pueden estar centrados o a la derecha, pero juntos).
-        - La portada no debe llevar ni encabezado ni pie de página.
-
-        Ejemplo de configuración sugerida (adaptable):
-        \\usepackage{fancyhdr}
-        \\pagestyle{fancy}
-        \\fancyhf{}
-        \\fancyhead[L]{\\textbf{\\university}}   % Universidad en encabezado izquierdo
-        \\fancyfoot[C]{\\textit{\\institute} \\quad \\textbar \\quad \\phone}  % Instituto y teléfono en pie centrado
-        \\renewcommand{\\headrulewidth}{0.4pt}
-        \\renewcommand{\\footrulewidth}{0.4pt}
-        \\thispagestyle{empty}  % para la portada
-
-        Nota: No es necesario que uses comandos literalmente como \\university, sino que debes escribir el texto real proporcionado.
-
-        ### CONTENIDO DEL LIBRO (basado en el sílabo):
-        ${syllabus}
-
-        ### REQUISITOS ESPECÍFICOS:
-        1. **Estructura del documento**:
-           - Portada con título "Libro de Trabajo", asignatura, universidad, instituto y fecha.
-           - Índice general.
-           - Introducción o presentación.
-           - Capítulos para cada tema principal del sílabo.
-           - Cada capítulo debe contener:
-             - Teoría detallada con ejemplos.
-             - Al menos **3 ejercicios resueltos paso a paso** (con explicaciones de cada paso).
-             - Al menos **10 problemas propuestos** (de dificultad media y alta) por tema, sin solución.
-           - Al final, un apartado de "Soluciones a los problemas propuestos" (opcional, o dejarlo como ejercicio).
-
-        2. **Cantidad total de problemas propuestos**: Debe haber un mínimo de **100 problemas propuestos** en todo el libro, distribuidos equitativamente entre los temas.
-
-        3. **Formato técnico**:
-           - Usa paquetes: inputenc (UTF-8), fontenc, babel (español), amsmath, amssymb, geometry, fancyhdr, titlesec, etc.
-           - Estilo profesional: secciones numeradas, subsecciones, etc.
-           - No incluyas gráficos (ni imágenes ni diagramas).
-           - Todo el contenido debe ser texto y ecuaciones matemáticas.
-
-        4. **Ejercicios resueltos**:
-           - Cada ejercicio debe tener enunciado.
-           - La solución debe estar dividida en pasos numerados, con comentarios que expliquen el razonamiento.
-           - Usa el entorno "enumerate" o "itemize" para los pasos.
-
-        5. **Problemas propuestos**:
-           - Enunciados claros.
-           - Dificultad media y alta (puedes indicarlo al inicio del problema).
-
-        ### INSTRUCCIONES ADICIONALES DEL USUARIO:
-        ${extraInstructions || 'Ninguna.'}
-
-        ### FORMATO DE SALIDA:
-        Devuelve ÚNICAMENTE el código LaTeX completo, sin texto adicional fuera del código. No uses bloques de código markdown. Comienza directamente con \\documentclass.
-        `;
-        }
-
-        // ----------------------------------------------------------------
-        // 6. GENERACIÓN (LLAMADA AL WORKER)
-        // ----------------------------------------------------------------
-        async function generateBook() {
-            // Validaciones
-            if (!syllabusText) {
-                alert('Por favor, carga el archivo PDF del sílabo.');
-                return;
-            }
-            if (!universityInput.value.trim() || !instituteInput.value.trim() || !phoneInput.value.trim()) {
-                alert('Por favor, completa los campos de Universidad, Instituto y Teléfono.');
-                return;
-            }
-
-            generateBtn.disabled = true;
-            generateBtn.textContent = '⏳ Generando...';
-            showPlaceholder();
-            hideError();
-            setStatus('Preparando prompt...', 5);
-
-            try {
-                const prompt = buildPrompt(
-                    syllabusText,
-                    universityInput.value.trim(),
-                    instituteInput.value.trim(),
-                    phoneInput.value.trim(),
-                    customPromptText.value
-                );
-
-                setStatus('Enviando a DeepSeek...', 20);
-
-                const response = await fetch(WORKER_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: 'deepseek-v4-pro', // o 'deepseek-v4-flash'
-                        messages: [
-                            { role: 'system', content: 'Eres un experto en LaTeX y educación. Genera código LaTeX limpio y profesional.' },
-                            { role: 'user', content: prompt }
-                        ],
-                        temperature: 0.7,
-                        max_tokens: 350000
-                    })
+                li.addEventListener('click', () => {
+                    seleccionarCapitulo(nombre);
                 });
 
-                setStatus('Esperando respuesta...', 40);
-
-                if (!response.ok) {
-                    let errMsg = `Error ${response.status}: ${response.statusText}`;
-                    try {
-                        const errData = await response.json();
-                        if (errData.error) errMsg = errData.error.message || errMsg;
-                    } catch (_) { /* ignore */ }
-                    throw new Error(errMsg);
+                if (nombre === capituloActual) {
+                    li.classList.add('active');
                 }
+                planList.appendChild(li);
+            });
+            capCount.textContent = plan.length;
 
-                setStatus('Procesando respuesta...', 70);
+            // Actualizar botones
+            const todosAceptados = plan.every(n => capitulosAceptados[n]);
+            ensamblarBtn.disabled = !todosAceptados || plan.length === 0;
 
-                const data = await response.json();
-                if (data.choices && data.choices.length > 0) {
-                    let content = data.choices[0].message.content;
-                    // Limpiar posibles bloques de código markdown
-                    content = content.replace(/```(?:latex)?\s*([\s\S]*?)\s*```/g, (match, code) => code.trim());
-                    // Si no empieza con \documentclass, intentamos extraerlo
-                    if (!content.trim().startsWith('\\documentclass')) {
-                        const match = content.match(/\\documentclass[\s\S]*/);
-                        if (match) content = match[0];
-                    }
-                    showLatex(content);
-                    setStatus('✅ Libro generado correctamente', 100);
+            // Si hay capituloActual, actualizar el panel
+            if (capituloActual && plan.includes(capituloActual)) {
+                capTitulo.textContent = capituloActual;
+                capTexto.value = capitulos[capituloActual] || '';
+                generarCapBtn.disabled = false;
+                aceptarCapBtn.disabled = capitulosAceptados[capituloActual] || !capitulos[capituloActual];
+                aplicarComentariosBtn.disabled = !capitulos[capituloActual];
+                capComentarios.disabled = capitulosAceptados[capituloActual];
+                if (capitulosAceptados[capituloActual]) {
+                    capTexto.readOnly = true;
                 } else {
-                    throw new Error('La respuesta no contiene contenido válido.');
+                    capTexto.readOnly = true; // siempre solo lectura, se edita mediante regeneración
                 }
+            } else {
+                // Seleccionar el primer capítulo no aceptado, o el primero
+                const primerNoAceptado = plan.find(n => !capitulosAceptados[n]);
+                if (primerNoAceptado) {
+                    seleccionarCapitulo(primerNoAceptado);
+                } else if (plan.length > 0) {
+                    seleccionarCapitulo(plan[0]);
+                } else {
+                    capTitulo.textContent = 'Sin capítulos';
+                    capTexto.value = '';
+                    generarCapBtn.disabled = true;
+                    aceptarCapBtn.disabled = true;
+                    aplicarComentariosBtn.disabled = true;
+                }
+            }
+        }
 
-            } catch (error) {
-                console.error(error);
-                showError(error.message || 'Error desconocido al generar el libro.');
-                setStatus('❌ Error', null);
-            } finally {
-                generateBtn.disabled = false;
-                generateBtn.textContent = '🚀 Generar Libro';
-                setTimeout(() => {
-                    if (!generatedLatex) setStatus('Listo', null);
-                }, 1000);
+        function seleccionarCapitulo(nombre) {
+            if (!plan.includes(nombre)) return;
+            capituloActual = nombre;
+            renderPlan();
+        }
+
+        // ----------------------------------------------------------------
+        // 6. COMUNICACIÓN CON LA IA
+        // ----------------------------------------------------------------
+        async function callDeepSeek(messages, max_tokens = 200000) {
+            const response = await fetch(WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'deepseek-v4-pro',
+                    messages: messages,
+                    temperature: 0.7,
+                    max_tokens: max_tokens
+                })
+            });
+            if (!response.ok) {
+                let errMsg = `Error ${response.status}: ${response.statusText}`;
+                try {
+                    const errData = await response.json();
+                    if (errData.error) errMsg = errData.error.message || errMsg;
+                } catch (_) { /* ignore */ }
+                throw new Error(errMsg);
+            }
+            const data = await response.json();
+            if (data.choices && data.choices.length > 0) {
+                return data.choices[0].message.content;
+            } else {
+                throw new Error('La respuesta no contiene contenido válido.');
             }
         }
 
         // ----------------------------------------------------------------
-        // 7. EVENT LISTENERS
+        // 7. GENERAR PLAN DE TRABAJO
         // ----------------------------------------------------------------
-        generateBtn.addEventListener('click', generateBook);
+        async function generarPlan() {
+            if (!syllabusText) {
+                alert('Primero carga el sílabo en PDF.');
+                return;
+            }
+            university = universityInput.value.trim();
+            institute = instituteInput.value.trim();
+            phone = phoneInput.value.trim();
+            if (!university || !institute || !phone) {
+                alert('Completa Universidad, Instituto y Teléfono.');
+                return;
+            }
+
+            generarPlanBtn.disabled = true;
+            setStatus('Generando plan de trabajo...', 10);
+            try {
+                const prompt = `
+          A partir del siguiente sílabo de una asignatura, genera un índice detallado de capítulos para un libro de trabajo.
+          El índice debe reflejar los temas principales del sílabo. Debes devolver ÚNICAMENTE una lista numerada con los títulos de los capítulos.
+          No incluyas subtítulos ni subcapítulos, solo los nombres de los capítulos principales.
+          Formato: 1. Título del capítulo 1
+                  2. Título del capítulo 2
+                  ...
+          No añadas texto adicional.
+
+          Sílabo:
+          ${syllabusText}
+        `;
+
+                const response = await callDeepSeek([
+                    { role: 'system', content: 'Eres un experto en diseño curricular y estructuras de libros de texto.' },
+                    { role: 'user', content: prompt }
+                ], 5000);
+
+                // Parsear la respuesta para obtener la lista
+                const lineas = response.split('\n').filter(line => line.trim().match(/^\d+\.\s*.+/));
+                const nuevosPlan = lineas.map(line => line.replace(/^\d+\.\s*/, '').trim());
+
+                if (nuevosPlan.length === 0) {
+                    throw new Error('No se pudo extraer el plan del sílabo. Respuesta: ' + response);
+                }
+
+                plan = nuevosPlan;
+                capitulos = {};
+                capitulosAceptados = {};
+                plan.forEach(n => {
+                    capitulos[n] = '';
+                    capitulosAceptados[n] = false;
+                });
+                capituloActual = plan[0];
+
+                workArea.style.display = 'grid';
+                resultArea.style.display = 'none';
+                renderPlan();
+                setStatus(`✅ Plan generado: ${plan.length} capítulos`, 100);
+            } catch (error) {
+                console.error(error);
+                showError('Error al generar el plan: ' + error.message);
+                setStatus('❌ Error', null);
+            } finally {
+                generarPlanBtn.disabled = false;
+            }
+        }
+
+        // ----------------------------------------------------------------
+        // 8. GENERAR CAPÍTULO
+        // ----------------------------------------------------------------
+        async function generarCapitulo(nombre, comentarios = '') {
+            if (!nombre || !plan.includes(nombre)) return;
+            if (capitulosAceptados[nombre]) {
+                alert('Este capítulo ya fue aceptado. Si quieres modificarlo, desmárcalo como aceptado (función no implementada).');
+                return;
+            }
+
+            generarCapBtn.disabled = true;
+            setStatus(`Generando capítulo: ${nombre}...`, 20);
+
+            try {
+                const instruccionAdicional = comentarios ? `
+              El usuario ha dado los siguientes comentarios sobre una versión anterior de este capítulo:
+              ${comentarios}
+              Por favor, genera una versión revisada del capítulo teniendo en cuenta estos comentarios.
+            ` : '';
+
+                const prompt = `
+          Genera el capítulo titulado "${nombre}" para un libro de trabajo de la asignatura descrita en el sílabo.
+
+          El capítulo debe ser AUTOCONTENIDO, es decir, no debe incluir preámbulo (\\documentclass, paquetes, etc.), sino únicamente el contenido desde \\section{${nombre}} hasta el final del capítulo.
+
+          El capítulo debe contener:
+          - Teoría detallada sobre el tema (con ejemplos).
+          - Al menos 3 ejercicios resueltos paso a paso (cada paso explicado).
+          - Al menos 10 problemas propuestos (dificultad media y alta).
+
+          Usa el entorno de ecuaciones, listas enumeradas, etc.
+
+          ${instruccionAdicional}
+
+          Sílabo (para referencia):
+          ${syllabusText}
+
+          Instrucciones adicionales del usuario: ${customPromptText.value || 'Ninguna.'}
+
+          Devuelve ÚNICAMENTE el código LaTeX del capítulo, sin texto fuera del código.
+        `;
+
+                const contenido = await callDeepSeek([
+                    { role: 'system', content: 'Eres un experto en LaTeX y educación. Genera contenido claro y bien estructurado.' },
+                    { role: 'user', content: prompt }
+                ], 200000);
+
+                // Limpiar posibles bloques
+                let limpio = contenido.replace(/```(?:latex)?\s*([\s\S]*?)\s*```/g, (match, code) => code.trim());
+                if (!limpio.trim().startsWith('\\section')) {
+                    // intentar extraer desde \section
+                    const match = limpio.match(/\\section[\s\S]*/);
+                    if (match) limpio = match[0];
+                }
+
+                capitulos[nombre] = limpio;
+                capTexto.value = limpio;
+                capComentarios.value = '';
+                aplicarComentariosBtn.disabled = false;
+                aceptarCapBtn.disabled = false;
+                renderPlan();
+                setStatus(`✅ Capítulo "${nombre}" generado. Revisa y comenta si es necesario.`, 100);
+            } catch (error) {
+                console.error(error);
+                showError('Error al generar el capítulo: ' + error.message);
+                setStatus('❌ Error', null);
+            } finally {
+                generarCapBtn.disabled = false;
+            }
+        }
+
+        // ----------------------------------------------------------------
+        // 9. ACEPTAR CAPÍTULO
+        // ----------------------------------------------------------------
+        function aceptarCapitulo() {
+            if (!capituloActual || !plan.includes(capituloActual)) return;
+            if (!capitulos[capituloActual]) {
+                alert('Primero genera el capítulo.');
+                return;
+            }
+            if (capitulosAceptados[capituloActual]) {
+                alert('Ya está aceptado.');
+                return;
+            }
+            capitulosAceptados[capituloActual] = true;
+            renderPlan();
+            setStatus(`✅ Capítulo "${capituloActual}" aceptado.`, null);
+
+            // Buscar siguiente no aceptado
+            const siguiente = plan.find(n => !capitulosAceptados[n]);
+            if (siguiente) {
+                seleccionarCapitulo(siguiente);
+            } else {
+                // Todos aceptados
+                alert('¡Todos los capítulos han sido aceptados! Ahora puedes ensamblar el libro completo.');
+                ensamblarBtn.disabled = false;
+            }
+        }
+
+        // ----------------------------------------------------------------
+        // 10. ENSAMBLAR LIBRO COMPLETO
+        // ----------------------------------------------------------------
+        function ensamblarLibro() {
+            if (plan.some(n => !capitulosAceptados[n])) {
+                alert('No todos los capítulos están aceptados.');
+                return;
+            }
+
+            // Construir preámbulo
+            const preambulo = `
+        \\documentclass[12pt]{book}
+        \\usepackage[utf8]{inputenc}
+        \\usepackage[spanish]{babel}
+        \\usepackage{amsmath, amssymb, amsthm}
+        \\usepackage{geometry}
+        \\geometry{a4paper, margin=2.5cm}
+        \\usepackage{fancyhdr}
+        \\usepackage{titlesec}
+        \\usepackage{enumitem}
+
+        \\pagestyle{fancy}
+        \\fancyhf{}
+        \\fancyhead[L]{\\textbf{${university}}}
+        \\fancyfoot[C]{\\textit{${institute}} \\quad \\textbar \\quad ${phone}}
+        \\renewcommand{\\headrulewidth}{0.4pt}
+        \\renewcommand{\\footrulewidth}{0.4pt}
+
+        \\title{Libro de Trabajo}
+        \\author{${university} \\\\ ${institute}}
+        \\date{\\today}
+
+        \\begin{document}
+        \\maketitle
+        \\thispagestyle{empty}
+        \\tableofcontents
+        \\newpage
+        `;
+
+            const contenido = plan.map(n => capitulos[n] || '').join('\n\n');
+            const final = '\\end{document}';
+
+            const completo = preambulo + '\n' + contenido + '\n' + final;
+
+            showFinalLatex(completo);
+            resultArea.style.display = 'block';
+            setStatus('✅ Libro completo ensamblado.', 100);
+        }
+
+        // ----------------------------------------------------------------
+        // 11. EVENT LISTENERS
+        // ----------------------------------------------------------------
+        generarPlanBtn.addEventListener('click', generarPlan);
+
+        generarCapBtn.addEventListener('click', () => {
+            if (capituloActual) {
+                generarCapitulo(capituloActual, '');
+            }
+        });
+
+        aplicarComentariosBtn.addEventListener('click', () => {
+            if (capituloActual) {
+                const comentarios = capComentarios.value.trim();
+                if (!comentarios) {
+                    alert('Escribe algún comentario o corrección.');
+                    return;
+                }
+                generarCapitulo(capituloActual, comentarios);
+            }
+        });
+
+        aceptarCapBtn.addEventListener('click', aceptarCapitulo);
+
+        ensamblarBtn.addEventListener('click', ensamblarLibro);
 
         clearBtn.addEventListener('click', () => {
+            // Reiniciar todo
             universityInput.value = '';
             instituteInput.value = '';
             phoneInput.value = '';
@@ -603,9 +971,14 @@
             syllabusStatus.className = 'status-badge';
             syllabusText = '';
             customPromptText.value = '';
-            generatedLatex = '';
-            showPlaceholder();
-            latexOutput.style.display = 'none';
+            plan = [];
+            capitulos = {};
+            capitulosAceptados = {};
+            capituloActual = null;
+            libroCompleto = '';
+            workArea.style.display = 'none';
+            resultArea.style.display = 'none';
+            showPlaceholderFinal();
             downloadTexBtn.disabled = true;
             copyTexBtn.disabled = true;
             setStatus('Listo', null);
@@ -613,12 +986,12 @@
         });
 
         downloadTexBtn.addEventListener('click', () => {
-            if (!generatedLatex) return;
-            const blob = new Blob([generatedLatex], { type: 'text/plain' });
+            if (!libroCompleto) return;
+            const blob = new Blob([libroCompleto], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'libro_trabajo.tex';
+            a.download = 'libro_completo.tex';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -626,20 +999,20 @@
         });
 
         copyTexBtn.addEventListener('click', async () => {
-            if (!generatedLatex) return;
+            if (!libroCompleto) return;
             try {
-                await navigator.clipboard.writeText(generatedLatex);
-                alert('¡Código LaTeX copiado al portapapeles!');
+                await navigator.clipboard.writeText(libroCompleto);
+                alert('¡Código LaTeX copiado!');
             } catch (err) {
-                alert('No se pudo copiar: ' + err.message);
+                alert('Error al copiar: ' + err.message);
             }
         });
 
         // ----------------------------------------------------------------
-        // 8. INICIO
+        // 12. INICIO
         // ----------------------------------------------------------------
-        showPlaceholder();
-        setStatus('Listo, completa los datos y genera.', null);
+        showPlaceholderFinal();
+        setStatus('Listo, carga el sílabo y genera el plan.', null);
     </script>
 
 </body>
