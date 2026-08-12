@@ -10,7 +10,7 @@
     </script>
 
     <style>
-        /* --- Estilos similares al anterior, adaptados --- */
+        /* --- Estilos --- */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -329,7 +329,7 @@
         // ----------------------------------------------------------------
         // 1. CONFIGURACIÓN
         // ----------------------------------------------------------------
-        const WORKER_URL = 'https://billowing-sunset-db3a.dcbmxstree.workers.dev/'; // <-- CAMBIAR POR TU URL REAL
+        const WORKER_URL = 'https://tu-proxy.tu-usuario.workers.dev'; // <-- CAMBIAR POR TU URL REAL
 
         pdfjsLib.GlobalWorkerOptions.workerSrc =
             'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -433,7 +433,7 @@
         }
 
         // ----------------------------------------------------------------
-        // 5. CONSTRUCCIÓN DEL PROMPT (LA ESPECIALIDAD)
+        // 5. CONSTRUCCIÓN DEL PROMPT (CORREGIDO)
         // ----------------------------------------------------------------
         function buildPrompt(syllabus, university, institute, phone, extraInstructions) {
             return `
@@ -444,7 +444,22 @@
         - Instituto/Facultad: ${institute || 'Facultad'}
         - Teléfono: ${phone || 'Teléfono'}
 
-        Debes incluir estos datos en el encabezado (usando el paquete fancyhdr) de cada página del documento. El diseño debe ser profesional, con márgenes adecuados, numeración, y estructura clara.
+        Debes incluir estos datos en el documento de la siguiente manera:
+        - En el **encabezado** (usando fancyhdr) debe aparecer **únicamente el nombre de la Universidad** (puede estar centrado o a la izquierda).
+        - En el **pie de página** debe aparecer el **nombre del Instituto y el número de teléfono** (pueden estar centrados o a la derecha, pero juntos).
+        - La portada no debe llevar ni encabezado ni pie de página.
+
+        Ejemplo de configuración sugerida (adaptable):
+        \\usepackage{fancyhdr}
+        \\pagestyle{fancy}
+        \\fancyhf{}
+        \\fancyhead[L]{\\textbf{\\university}}   % Universidad en encabezado izquierdo
+        \\fancyfoot[C]{\\textit{\\institute} \\quad \\textbar \\quad \\phone}  % Instituto y teléfono en pie centrado
+        \\renewcommand{\\headrulewidth}{0.4pt}
+        \\renewcommand{\\footrulewidth}{0.4pt}
+        \\thispagestyle{empty}  % para la portada
+
+        Nota: No es necesario que uses comandos literalmente como \\university, sino que debes escribir el texto real proporcionado.
 
         ### CONTENIDO DEL LIBRO (basado en el sílabo):
         ${syllabus}
@@ -465,7 +480,6 @@
 
         3. **Formato técnico**:
            - Usa paquetes: inputenc (UTF-8), fontenc, babel (español), amsmath, amssymb, geometry, fancyhdr, titlesec, etc.
-           - Configura fancyhdr para que en cada página (excepto portada) aparezca en el encabezado: Universidad, Instituto, Teléfono.
            - Estilo profesional: secciones numeradas, subsecciones, etc.
            - No incluyas gráficos (ni imágenes ni diagramas).
            - Todo el contenido debe ser texto y ecuaciones matemáticas.
@@ -528,7 +542,7 @@
                             { role: 'user', content: prompt }
                         ],
                         temperature: 0.7,
-                        max_tokens: 350000 // suficiente para un libro extenso
+                        max_tokens: 350000
                     })
                 });
 
@@ -552,7 +566,6 @@
                     content = content.replace(/```(?:latex)?\s*([\s\S]*?)\s*```/g, (match, code) => code.trim());
                     // Si no empieza con \documentclass, intentamos extraerlo
                     if (!content.trim().startsWith('\\documentclass')) {
-                        // Buscar el primer \documentclass
                         const match = content.match(/\\documentclass[\s\S]*/);
                         if (match) content = match[0];
                     }
